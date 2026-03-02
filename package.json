@@ -1,0 +1,25 @@
+{
+  "name": "mcp-in-test",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "inspect": "npx @modelcontextprotocol/inspector node src/server.js"
+  },
+  "keywords": [
+    "mcp",
+    "toutiao",
+    "news",
+    "puppeteer"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "dotenv": "^17.3.1",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^24.37.5"
+  }
+}
