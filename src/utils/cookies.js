@@ -4,9 +4,9 @@ import path from 'path';
 const COOKIE_PATH = path.join(process.cwd(), 'cookies.json');
 
 /**
- * 加载 Cookie 到 Puppeteer 页面
+ * Load cookies into a Puppeteer page.
  * @param {object} page Puppeteer Page object
- * @returns {Promise<boolean>} 是否成功加载（文件是否存在）
+ * @returns {Promise<boolean>} Whether loading succeeded (i.e., whether the file exists)
  */
 export async function loadCookies(page) {
     try {
@@ -25,7 +25,7 @@ export async function loadCookies(page) {
 }
 
 /**
- * 保存页面 Cookie 到本地文件
+ * Save page cookies to a local file.
  * @param {object} page Puppeteer Page object
  */
 export async function saveCookies(page) {
@@ -35,7 +35,7 @@ export async function saveCookies(page) {
 }
 
 /**
- * 删除本地 Cookie 文件
+ * Delete the local cookies file.
  */
 export async function deleteCookies() {
     try {

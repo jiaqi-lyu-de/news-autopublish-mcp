@@ -2,8 +2,8 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 async function runClient() {
-    // 创建传输层，指向我们刚刚写的 server.js
-    // 注意：需要使用 node 运行 server.js
+    // Create a transport layer pointing to the server.js we just wrote.
+    // Note: server.js must be run with Node.js.
     const transport = new StdioClientTransport({
         command: "node",
         args: ["src/server.js"],
@@ -21,11 +21,11 @@ async function runClient() {
 
     await client.connect(transport);
 
-    // 1. 列出可用的工具
+    // 1. List available tools
     const tools = await client.listTools();
     console.log("可用工具:", JSON.stringify(tools, null, 2));
 
-    // 2. 检查登录状态
+    // 2. Check login status
     console.log("\n--- 检查登录状态 ---");
     const statusResult = await client.callTool({
         name: "toutiao_check_status",
@@ -33,11 +33,13 @@ async function runClient() {
     });
     console.log("状态检查结果:", JSON.stringify(statusResult, null, 2));
 
-    // 3. 测试登录 (警告：这会启动浏览器并等待扫码)
+    // 3. Test login (warning: this launches a browser and waits for a QR scan)
+    // timeout 5 minutes
     console.log("\n--- 开始登录流程 ---");
     const loginResult = await client.callTool({
         name: "toutiao_login",
         arguments: {},
+        timeout: 5 * 60 * 1000,
     });
     console.log("登录结果:", JSON.stringify(loginResult, null, 2));
 

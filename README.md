@@ -1,78 +1,105 @@
-# MCP Toutiao & News Server
+# toutiao-mcp
 
 > 🌐 [English](#english) | [中文](#中文)
+
+An MCP ([Model Context Protocol](https://modelcontextprotocol.io/)) server that automates a full pipeline:
+**fetch global breaking news → publish to Toutiao (今日头条)**, orchestrated by any MCP-compatible AI client.
 
 ---
 
 <a name="english"></a>
 
-## 🇬🇧 English
+## English
 
-An MCP ([Model Context Protocol](https://modelcontextprotocol.io/)) server that automates a full end-to-end pipeline: **fetch real-time global breaking news → auto-publish to Toutiao** — all driven by an AI assistant like Claude.
+### What this project does
 
-### 🗞️ What is Toutiao?
-
-[Toutiao (今日头条)](https://www.toutiao.com/) is China's largest AI-powered news and content platform, operated by ByteDance (the company behind TikTok). With over **300 million daily active users**, it is the dominant content distribution channel in China — roughly analogous to a combination of Google News and Medium. This project enables automated content publishing to Toutiao's creator platform via browser automation.
-
-### 🔄 Core Workflow
+[Toutiao (今日头条)](https://www.toutiao.com/) is a major content distribution platform in China. This project uses browser automation (Puppeteer) to help an AI assistant:
 
 ```
 Event Registry API  ──▶  get_breaking_news  ──▶  toutiao_publish_article  ──▶  Toutiao
-  (global news)               (fetch)                   (auto-publish)          (platform)
 ```
 
-Claude (or any MCP-compatible AI) orchestrates the entire pipeline: it fetches breaking news from a third-party news API, then automatically publishes the content to your Toutiao creator account — no manual copy-pasting required.
+### Quick Start
 
-### ✨ Features
+Prerequisites: Node.js (recommended: current LTS).
 
-**Toutiao Automation**
-- `toutiao_login` — Generate a QR code login and automatically monitor scan status; saves session cookies on success.
-- `toutiao_check_status` — Check whether the current Toutiao session is still valid.
-- `toutiao_logout` — Safely sign out and remove local credential files.
-- `toutiao_publish_article` — Publish an article with a title, body, and optional cover image.
-
-**News Fetching**
-- `get_breaking_news` — Pull real-time global breaking news via the [Event Registry API](https://eventregistry.org/), providing the raw content for publishing.
-
-**Technical Highlights**
-- 🔐 **Cookie persistence** — Automatically manages `cookies.json` so you don't need to scan a QR code every session.
-- 🛡️ **Privacy-first** — API keys and cookies are stored via environment variables and local files; never bundled with source code.
-- 🤖 **Puppeteer-powered** — Simulates a real browser for reliable, stable automation against Toutiao's creator portal.
-
----
-
-### 🚀 Quick Start
-
-#### 1. Install Dependencies
-
-Requires [Node.js](https://nodejs.org/).
+1) Install dependencies
 
 ```bash
 npm install
 ```
 
-#### 2. Configure Environment Variables
+2) Configure environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and add your API key:
+Set your Event Registry API key:
 
 ```env
 NEWS_API_KEY=your_event_registry_api_key
 ```
 
-#### 3. Run & Debug
+3) Run in MCP Inspector (recommended for debugging)
 
-**Development mode (MCP Inspector):**
 ```bash
 npm run inspect
 ```
 
-**Integrate with Claude Desktop** — Add this to your `claude_desktop_config.json`:
+### Project Overview
 
-> Typically found at `~/Library/Application Support/Claude/` (macOS)
+Main Features
+
+<details>
+<summary><strong>1) QR Login (toutiao_login)</strong></summary>
+
+Starts a visible browser, opens Toutiao, extracts the QR code, and watches login state in the background.
+
+Demo video:
+
+</details>
+
+<details>
+<summary><strong>2) Check Login Status (toutiao_check_status)</strong></summary>
+
+Runs a headless browser to validate whether the current session is still logged in, and updates cookies if needed.
+
+Demo video:
+
+</details>
+
+<details>
+<summary><strong>3) Publish Article (toutiao_publish_article)</strong></summary>
+
+Publishes an article with `title`, `content`, and a local cover image path (`imagePath`).
+
+Demo video:
+
+</details>
+
+<details>
+<summary><strong>4) Logout / Clear Cookies (toutiao_logout)</strong></summary>
+
+Deletes the local `cookies.json` file to reset login state.
+
+Demo video:
+
+</details>
+
+### MCP Tool List
+
+| Tool | Description | Parameters |
+| :--- | :--- | :--- |
+| `toutiao_login` | Get QR code and wait for scan | — |
+| `toutiao_check_status` | Check Toutiao login status | — |
+| `toutiao_logout` | Delete local cookies file | — |
+| `get_breaking_news` | Fetch breaking news from Event Registry | — |
+| `toutiao_publish_article` | Publish a Toutiao article | `title`, `content`, `imagePath` |
+
+### Claude Desktop integration
+
+Add this to your `claude_desktop_config.json`:
 
 ```json
 {
@@ -88,29 +115,14 @@ npm run inspect
 }
 ```
 
----
+### Notes & Troubleshooting
 
-### 🛠️ Tool Reference
+- Puppeteer downloads a Chromium binary on first run; make sure your network is available.
+- `cookies.json` contains sensitive session tokens and is ignored by `.gitignore` by default. Do not commit it.
+- `toutiao_publish_article` requires `imagePath` to exist locally (absolute path recommended).
+- If Toutiao UI changes, selectors may break and require updates in `src/toutiao/publish.js`.
 
-| Tool | Description | Parameters |
-| :--- | :--- | :--- |
-| `toutiao_login` | Generate a QR code and wait for scan | — |
-| `toutiao_check_status` | Check Toutiao login status | — |
-| `toutiao_logout` | Clear login credentials | — |
-| `toutiao_publish_article` | Publish an article | `title`, `content`, `imagePath` |
-| `get_breaking_news` | Fetch global breaking news | — |
-
----
-
-### ⚠️ Notes
-
-- **Chromium download** — Puppeteer will auto-download a Chromium binary on first run. Ensure you have a stable network connection.
-- **QR code rendering** — `toutiao_login` returns a Base64-encoded QR code image that Claude can render directly for the user to scan.
-- **Security** — `cookies.json` contains sensitive session tokens. It is included in `.gitignore` by default — never commit it to source control.
-
----
-
-### 📄 License
+### License
 
 [ISC License](./LICENSE)
 
@@ -119,69 +131,97 @@ npm run inspect
 
 <a name="中文"></a>
 
-## 🇨🇳 中文
+## 中文
 
-基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 的功能型服务器，实现完整的端到端自动化流程：**获取全球突发新闻 → 自动发布到今日头条**，全程由 Claude 等 AI 助手驱动编排。
+### 项目做什么
 
-### 🔄 核心工作流
+[今日头条 (Toutiao)](https://www.toutiao.com/) 是国内主要的内容分发平台之一。本项目通过 Puppeteer 浏览器自动化，让支持 MCP 的 AI 客户端可以完成：
 
 ```
 Event Registry API  ──▶  get_breaking_news  ──▶  toutiao_publish_article  ──▶  今日头条
-    （新闻源）                （抓取资讯）               （自动发布）             （平台）
 ```
 
-AI 助手负责编排整个流程：从第三方新闻 API 拉取突发资讯，再自动发布到您的头条创作者账号，无需手动复制粘贴。
+### 快速开始
 
-### ✨ 功能特性
+环境要求：Node.js（建议使用 LTS 版本）。
 
-**今日头条自动化**
-- `toutiao_login` — 获取登录二维码，后台自动监听扫码状态，登录成功后持久化保存 Cookie。
-- `toutiao_check_status` — 实时检查当前头条登录会话是否仍然有效。
-- `toutiao_logout` — 安全退出登录，并清除本地凭证文件。
-- `toutiao_publish_article` — 自动化发布文章，支持标题、正文及本地封面图。
-
-**全球资讯获取**
-- `get_breaking_news` — 通过 [Event Registry API](https://eventregistry.org/) 实时拉取全球突发热点新闻，作为自动发布的内容来源。
-
-**技术亮点**
-- 🔐 **Cookie 持久化** — 自动管理 `cookies.json`，避免每次会话重复扫码。
-- 🛡️ **隐私安全** — API Key 与 Cookie 均通过环境变量和本地文件管理，不随代码库分发。
-- 🤖 **Puppeteer 驱动** — 模拟真实浏览器行为，确保在头条创作者平台上自动化操作的稳定性。
-
----
-
-### 🚀 快速开始
-
-#### 1. 安装依赖
-
-请确保系统已安装 [Node.js](https://nodejs.org/)。
+1）安装依赖
 
 ```bash
 npm install
 ```
 
-#### 2. 配置环境变量
+2）配置环境变量
 
 ```bash
 cp .env.example .env
 ```
 
-在 `.env` 文件中填入您的 API Key：
+在 `.env` 中配置 Event Registry API Key：
 
 ```env
 NEWS_API_KEY=your_event_registry_api_key
 ```
 
-#### 3. 启动与调试
+3）使用 MCP Inspector 调试（推荐）
 
-**开发者模式（MCP Inspector）：**
 ```bash
 npm run inspect
 ```
 
-**集成到 Claude Desktop** — 将以下内容添加至 `claude_desktop_config.json`：
+### 项目简介
 
-> 文件通常位于 `~/Library/Application Support/Claude/`（macOS）
+主要功能
+
+<details>
+<summary><strong>1）扫码登录（toutiao_login）</strong></summary>
+
+启动可见浏览器打开头条，提取二维码，并在后台监听登录状态变化。
+
+视频演示：
+
+</details>
+
+<details>
+<summary><strong>2）检查登录状态（toutiao_check_status）</strong></summary>
+
+使用无头浏览器检测当前会话是否已登录，并在需要时更新 Cookie。
+
+视频演示：
+
+</details>
+
+<details>
+<summary><strong>3）发布文章（toutiao_publish_article）</strong></summary>
+
+发布文章，参数为 `title`、`content`，以及本地封面图片路径 `imagePath`。
+
+视频演示：
+
+</details>
+
+<details>
+<summary><strong>4）退出登录 / 清理 Cookie（toutiao_logout）</strong></summary>
+
+删除本地 `cookies.json`，重置登录状态。
+
+视频演示：
+
+</details>
+
+### MCP 工具列表
+
+| 工具 | 说明 | 参数 |
+| :--- | :--- | :--- |
+| `toutiao_login` | 获取登录二维码并等待扫码 | 无 |
+| `toutiao_check_status` | 检查头条登录状态 | 无 |
+| `toutiao_logout` | 删除本地 cookies 文件 | 无 |
+| `get_breaking_news` | 从 Event Registry 获取突发新闻 | 无 |
+| `toutiao_publish_article` | 发布头条文章 | `title`, `content`, `imagePath` |
+
+### Claude Desktop 集成
+
+将以下内容添加至 `claude_desktop_config.json`：
 
 ```json
 {
@@ -197,28 +237,13 @@ npm run inspect
 }
 ```
 
----
+### 注意事项与排错
 
-### 🛠️ 工具详情
+- Puppeteer 首次运行会下载 Chromium 内核，请确保网络通畅。
+- `cookies.json` 含敏感会话令牌，默认已加入 `.gitignore`，请勿提交到仓库。
+- `toutiao_publish_article` 需要本地存在的 `imagePath`（建议使用绝对路径）。
+- 若头条页面结构变更导致选择器失效，可从 `src/toutiao/publish.js` 开始排查与修复。
 
-| 工具名称 | 描述 | 参数 |
-| :--- | :--- | :--- |
-| `toutiao_login` | 获取登录二维码并等待扫码 | 无 |
-| `toutiao_check_status` | 检查头条登录状态 | 无 |
-| `toutiao_logout` | 清除登录凭证 | 无 |
-| `toutiao_publish_article` | 发布头条文章 | `title`, `content`, `imagePath` |
-| `get_breaking_news` | 获取全球突发新闻 | 无 |
-
----
-
-### ⚠️ 注意事项
-
-- **Chromium 下载** — Puppeteer 在首次运行时会自动下载 Chromium 内核，请确保网络通畅。
-- **二维码渲染** — `toutiao_login` 会返回 Base64 格式的二维码图片，AI 可直接渲染供用户扫描。
-- **安全提示** — `cookies.json` 包含敏感登录令牌，已默认加入 `.gitignore`，**切勿提交至代码库**。
-
----
-
-### 📄 开源协议
+### 开源协议
 
 [ISC License](./LICENSE)

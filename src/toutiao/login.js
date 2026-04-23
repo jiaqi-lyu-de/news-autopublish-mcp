@@ -2,21 +2,21 @@ import puppeteer from 'puppeteer';
 import { loadCookies, saveCookies } from '../utils/cookies.js';
 
 /**
- * 后台监听登录任务
+ * Background login watcher.
  */
 
 async function handleBackgroundLogin(browser, page, loginBtnSelector) {
     try {
         console.error('Starting background login listener...');
 
-        // 1. 首先确保当前是“未登录”状态（登录按钮存在）
+        // 1. First, ensure we are in the "logged out" state (login button exists).
         let initialChecked = false;
-        const timeout = 5 * 60 * 1000; // 5分钟超时
+        const timeout = 5 * 60 * 1000; // 5-minute timeout
         const startTime = Date.now();
 
         while (Date.now() - startTime < timeout) {
             try {
-                // 检查页面是否已关闭
+                // Check whether the page has been closed.
                 if (page.isClosed()) break;
 
                 const buttonExists = await page.evaluate((sel) => {
@@ -30,7 +30,7 @@ async function handleBackgroundLogin(browser, page, loginBtnSelector) {
                         console.error('Confirmed not logged in state. Waiting for user to scan...');
                     }
                 } else {
-                    // 2. 检查按钮是否消失（代表登录成功）
+                    // 2. Check whether the button disappeared (indicates login success).
                     if (!buttonExists) {
                         console.error('Login successful detected in background.');
                         await saveCookies(page);
@@ -38,7 +38,7 @@ async function handleBackgroundLogin(browser, page, loginBtnSelector) {
                     }
                 }
             } catch (err) {
-                // 忽略 "Execution context was destroyed" 错误，因为这通常发生在页面跳转时
+                // Ignore "Execution context was destroyed" because it commonly happens during navigation.
                 if (err.message.includes('Execution context was destroyed')) {
                     console.error('Page navigating, retrying check...');
                 } else {
@@ -46,7 +46,7 @@ async function handleBackgroundLogin(browser, page, loginBtnSelector) {
                 }
             }
 
-            // 等待 500ms 后再次检查
+            // Wait 500ms and check again.
             await new Promise(resolve => setTimeout(resolve, 500));
         }
     } catch (error) {
@@ -58,7 +58,7 @@ async function handleBackgroundLogin(browser, page, loginBtnSelector) {
 }
 
 /**
- * 实现登录逻辑：立即提取并返回二维码，后台开启监听
+ * Login flow: immediately extract and return the QR code, then start a background watcher.
  */
 export async function login() {
     const browser = await puppeteer.launch({
@@ -76,8 +76,9 @@ export async function login() {
     try {
         await loadCookies(page);
         await page.goto('https://www.toutiao.com/', { waitUntil: 'networkidle2' });
+        console.error('Page loaded');
 
-        // 点击登录按钮打开二维码
+        // Click the login button to open the QR code.
         const loginBtnSelector = '.fix-header .login-button';
         await page.waitForSelector(loginBtnSelector, { timeout: 5000 });
 
@@ -85,8 +86,7 @@ export async function login() {
             const btn = document.querySelector(sel);
             if (btn) btn.click();
         }, loginBtnSelector);
-
-        // 获取二维码
+        // Get the QR code.
         const qrContentSelector = '.web-login-scan-code img';
         await page.waitForSelector(qrContentSelector, { visible: true, timeout: 5000 });
         const qrSrc = await page.evaluate((sel) => {
@@ -98,10 +98,10 @@ export async function login() {
             throw new Error('Failed to get QR code source');
         }
 
-        // --- 核心逻辑：不使用 await，启动后台监听任务 ---
+        // --- Core logic: start background watcher without awaiting it ---
         handleBackgroundLogin(browser, page, loginBtnSelector).catch(err => console.error("Background error:", err));
 
-        // 立即返回结果给 MCP，前端就能显示二维码了
+        // Return immediately to MCP so the frontend can display the QR code.
         return {
             status: 'waiting_for_scan',
             qrCode: qrSrc,

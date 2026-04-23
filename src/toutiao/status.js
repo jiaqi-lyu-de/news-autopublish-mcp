@@ -2,16 +2,16 @@ import puppeteer from 'puppeteer';
 import { loadCookies, saveCookies } from '../utils/cookies.js';
 
 /**
- * 在给定页面上检查登录状态
- * 如果元素 .fix-header .login-button 不存在，则认为已登录
- * 如果已登录，会尝试更新并保存 Cookie
+ * Check login status on a given page.
+ * If the element `.fix-header .login-button` does not exist, we treat it as logged in.
+ * If logged in, we try to update and save cookies.
  * @param {object} page Puppeteer Page object
  */
 export async function checkLoginStatusOnPage(page) {
     const loginButtonSelector = '.fix-header .login-button';
 
-    // 确保页面加载完成
-    // 如果已经在头条页面了，可以直接检查
+    // Ensure the page is loaded.
+    // If we're already on Toutiao, we can check directly.
     const currentUrl = page.url();
     if (!currentUrl.includes('toutiao.com')) {
         await page.goto('https://www.toutiao.com/', { waitUntil: 'networkidle2' });
@@ -25,7 +25,7 @@ export async function checkLoginStatusOnPage(page) {
     const isLoggedIn = !buttonExists;
 
     if (isLoggedIn) {
-        // 如果已登录，保存最新的 Cookie
+        // If logged in, save the latest cookies.
         await saveCookies(page);
     }
 
@@ -36,7 +36,7 @@ export async function checkLoginStatusOnPage(page) {
 }
 
 /**
- * 公共接口：检查登录状态
+ * Public API: check login status.
  */
 export async function checkLoginStatus() {
     const browser = await puppeteer.launch({
@@ -59,4 +59,3 @@ export async function checkLoginStatus() {
         await browser.close();
     }
 }
-

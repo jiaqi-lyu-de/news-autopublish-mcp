@@ -13,7 +13,7 @@ import { publishArticle } from "./toutiao/publish.js";
 
 
 /**
- * 创建一个简单的 MCP 服务器
+ * Create a simple MCP server.
  */
 const server = new Server(
     {
@@ -28,7 +28,7 @@ const server = new Server(
 );
 
 /**
- * 注册工具
+ * Register tools.
  */
 server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
@@ -84,11 +84,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 });
 
 /**
- * 处理工具调用请求
+ * Handle tool call requests.
  */
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (request.params.name === "toutiao_login") {
         const result = await login();
+        console.error('Login tool execution finished, returning result...');
         const content = [
             {
                 type: "text",
@@ -96,7 +97,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             },
         ];
 
-        // 如果有二维码，也直接返回一个图像块
+        // If a QR code is present, also return it as an image block.
         if (result.qrCode && result.qrCode.startsWith('data:image')) {
             const [metadata, base64Data] = result.qrCode.split(',');
             const mimeType = metadata.split(':')[1].split(';')[0];
@@ -147,7 +148,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (request.params.name === "toutiao_publish_article") {
-        const { title, content, imagePath } = request.params.arguments;
+        const { title, content, imagePath } = request.params.arguments ?? {};
         const result = await publishArticle(title, content, imagePath);
         return {
             content: [
@@ -164,7 +165,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 /**
- * 启动服务器
+ * Start the server.
  */
 async function main() {
     const transport = new StdioServerTransport();

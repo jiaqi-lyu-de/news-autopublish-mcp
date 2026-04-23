@@ -3,32 +3,32 @@ import fs from 'fs/promises';
 import { loadCookies } from '../utils/cookies.js';
 import { checkLoginStatusOnPage } from './status.js';
 
-// 页面选择器配置
+// Page selector configuration
 const TOUTIAO_CONFIG = {
     homeUrl: 'https://www.toutiao.com/',
     selectors: {
-        // 首页发布按钮流程
-        publisherIcon: '.header-right .publisher-icon',     // 首页发布按钮
-        publishMenuItem: '.publish-list [role="menuitem"]',         // 发布菜单项 (通常第0个是图文)
+        // Home page "publish" flow
+        publisherIcon: '.header-right .publisher-icon',     // Home page publish button
+        publishMenuItem: '.publish-list [role="menuitem"]',         // Publish menu item (usually index 0 is "article")
 
-        // 发布页内部元素
-        uploadTrigger: '.byte-spin-content .article-cover-add',      // 封面图点击区域
-        secondUploadBtn: '.btn-upload-scand .upload-handler',      // 弹窗内的上传按钮
-        titleInput: '.editor-title textarea',                      // 标题输入框
-        contentEditor: '.syl-editor-wrap .ProseMirror',            // 正文编辑器
-        publishBtn: '.publish-btn-last',                           // 最终发布按钮
-        uploadConfirm: '[data-e2e="imageUploadConfirm-btn"]'       // 二级弹窗确认按钮
+        // Elements inside the publish page
+        uploadTrigger: '.byte-spin-content .article-cover-add',      // Cover image click area
+        secondUploadBtn: '.btn-upload-scand .upload-handler',      // Upload button inside the modal
+        titleInput: '.editor-title textarea',                      // Title input
+        contentEditor: '.syl-editor-wrap .ProseMirror',            // Content editor
+        publishBtn: '.publish-btn-last',                           // Final publish button
+        uploadConfirm: '[data-e2e="imageUploadConfirm-btn"]'       // Confirm button in the secondary modal
     }
 };
 
 
 /**
- * 发布文章工具实现
+ * Publish-article tool implementation.
  */
 export async function publishArticle(title, content, imagePath) {
     const { homeUrl, selectors } = TOUTIAO_CONFIG;
 
-    // 校验路径
+    // Validate path
     try {
         await fs.access(imagePath);
     } catch (error) {
@@ -38,7 +38,7 @@ export async function publishArticle(title, content, imagePath) {
         };
     }
 
-    // 校验标题字数
+    // Validate title length
     if (title.length < 2 || title.length > 30) {
         return {
             status: 'error',
@@ -47,7 +47,7 @@ export async function publishArticle(title, content, imagePath) {
     }
 
     const browser = await puppeteer.launch({
-        headless: false, // 方便调试
+        headless: false, // For easier debugging
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -59,17 +59,17 @@ export async function publishArticle(title, content, imagePath) {
 
     const initialPage = await browser.newPage();
 
-    // 注入脚本隐藏 webdriver 标志
+    // Inject a script to hide the webdriver flag.
     await initialPage.evaluateOnNewDocument(() => {
         Object.defineProperty(navigator, 'webdriver', {
             get: () => undefined,
         });
     });
 
-    // 设置 User-Agent 模拟真实浏览器
+    // Set a User-Agent to mimic a real browser.
     await initialPage.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
 
-    // 通过 evaluate 获取当前显示器的屏幕宽高
+    // Use evaluate to get the current screen resolution.
     const screenResolution = await initialPage.evaluate(() => {
         return {
             width: window.screen.availWidth,
@@ -78,14 +78,14 @@ export async function publishArticle(title, content, imagePath) {
         };
     });
 
-    // 强制设置视口
+    // Force the viewport size.
     await initialPage.setViewport(screenResolution);
 
     try {
-        // 1. 初始化并加载 Cookie
+        // 1. Initialize and load cookies.
         await loadCookies(initialPage);
 
-        // 2. 检查登录状态
+        // 2. Check login status.
         console.error('Checking login status...');
         const loginStatus = await checkLoginStatusOnPage(initialPage);
         if (!loginStatus.isLoggedIn) {
@@ -96,13 +96,13 @@ export async function publishArticle(title, content, imagePath) {
             };
         }
 
-        // 3. 首页操作：点击发布，选择模式
-        // checkLoginStatusOnPage 已经带我们落到了首页，不需要再次跳转
+        // 3. Home page: click publish and choose a mode.
+        // checkLoginStatusOnPage already navigated us to the home page, no need to navigate again.
 
         console.error('Clicking publisher icon (with hover/move)...');
         await initialPage.waitForSelector(selectors.publisherIcon, { visible: true, timeout: 10000 });
 
-        // 模拟更真实的用户行为：移动 -> 悬停 -> 点击
+        // Mimic more realistic user behavior: move -> hover -> click.
         const rect = await initialPage.evaluate((sel) => {
             const el = document.querySelector(sel);
             const { x, y, width, height } = el.getBoundingClientRect();
@@ -110,11 +110,11 @@ export async function publishArticle(title, content, imagePath) {
         }, selectors.publisherIcon);
 
         await initialPage.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
-        await new Promise(r => setTimeout(r, 2000)); // 悬停一会
+        await new Promise(r => setTimeout(r, 1000)); // Hover for a shorter moment
         await initialPage.click(selectors.publisherIcon);
 
 
-        // 捕获新打开的窗口
+        // Capture the newly opened window.
         const newTargetPromise = browser.waitForTarget(target => target.opener() === initialPage.target());
 
 
@@ -128,20 +128,23 @@ export async function publishArticle(title, content, imagePath) {
         // await page.setViewport(screenResolution);
         // console.error('Switched to new publish window.');
 
-        // // // 给新页面设置 WebDriver 屏蔽
+        // // // Apply WebDriver masking for the new page
         // // await page.evaluateOnNewDocument(() => {
         // //     Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
         // // });
 
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => { });
+        console.error('Waiting for navigation...');
 
-        // 4. 图片上传
+        await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 3000 }).catch(() => { });
+        console.error('Navigation completed.');
+
+        // 4. Upload image.
         console.error('Uploading image...');
-        // 确保按钮存在且可见
+        // Ensure the button exists and is visible.
         await page.waitForSelector(selectors.uploadTrigger, { visible: true, timeout: 5000 });
         console.error('Upload button found and visible.');
 
-        // 滚动到视野中心
+        // Scroll into the center of the viewport.
         await page.evaluate((sel) => {
             const el = document.querySelector(sel);
             if (el) el.scrollIntoView({ behavior: 'auto', block: 'center' });
@@ -149,7 +152,7 @@ export async function publishArticle(title, content, imagePath) {
 
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // 点击上传按钮以打开二级上传界面
+        // Click the upload trigger to open the second-stage upload UI.
         try {
             await page.click(selectors.uploadTrigger);
         } catch (err) {
@@ -157,14 +160,14 @@ export async function publishArticle(title, content, imagePath) {
             await page.evaluate(sel => document.querySelector(sel)?.click(), selectors.uploadTrigger);
         }
 
-        // 等待二级弹窗加载
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Wait for the modal to load.
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // 等待二级上传按钮出现
+        // Wait for the second-stage upload button to appear.
         await page.waitForSelector(selectors.secondUploadBtn, { visible: true, timeout: 10000 });
         console.error('Second-stage upload button ready.');
 
-        // 触发上传
+        // Trigger file upload.
         const [fileChooser] = await Promise.all([
             page.waitForFileChooser(),
             page.click(selectors.secondUploadBtn)
@@ -172,17 +175,17 @@ export async function publishArticle(title, content, imagePath) {
         await fileChooser.accept([imagePath]);
         console.error('Image uploaded successfully.');
 
-        await new Promise(resolve => setTimeout(resolve, 5000)); // 等待图片处理
+        await new Promise(resolve => setTimeout(resolve, 3000)); // Wait for image processing
         await page.click(selectors.uploadConfirm);
 
-        // 5. 标题输入
+        // 5. Title input.
         console.error('Inputting title...');
         await page.waitForSelector(selectors.titleInput, { timeout: 10000 });
         await page.click(selectors.titleInput, { clickCount: 3 });
         await page.keyboard.press('Backspace');
         await page.type(selectors.titleInput, title);
 
-        // 6. 正文输入
+        // 6. Content input.
         console.error('Inputting content...');
         await page.waitForSelector(selectors.contentEditor, { timeout: 10000 });
         await page.click(selectors.contentEditor);
@@ -194,7 +197,7 @@ export async function publishArticle(title, content, imagePath) {
 
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // 7. 最终提交
+        // 7. Final submit.
         console.error('Clicking publish button...');
         await page.waitForSelector(selectors.publishBtn, { timeout: 10000 });
         await page.click(selectors.publishBtn);
@@ -202,7 +205,7 @@ export async function publishArticle(title, content, imagePath) {
         await page.click(selectors.publishBtn);
         await browser.close();
 
-        // 返回成功信息
+        // Return success info.
         return {
             status: 'success',
             message: '文章内容已在新窗口中填充并触发发布，请确认。',
@@ -220,5 +223,4 @@ export async function publishArticle(title, content, imagePath) {
         };
     }
 }
-
 
