@@ -3,3 +3,5 @@ node_modules
 cookies.json
 .DS_Store
 package-lock.json
+videos/*.mp4
+videos/**/*.mp4
