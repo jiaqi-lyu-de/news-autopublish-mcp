@@ -62,6 +62,16 @@ Main Features
 
 ![toutiao_publish_article_codex](videos/toutiao_publish_article_codex.gif)
 
+Prompt used for this demo:
+
+```text
+Please help me post a breaking news message on Toutiao,
+
+and attach the following image: /Users/qingyu/Desktop/news_img.png
+
+Please use toutiao-mcp to post. You can use toutiao-mcp's built-in skills to decide the article title and content yourself.
+```
+
 <details>
 <summary><strong>1) QR Login (toutiao_login)</strong></summary>
 
@@ -212,6 +222,17 @@ npm run inspect
 **发布文章演示（Codex）**
 
 ![toutiao_publish_article_codex](videos/toutiao_publish_article_codex.gif)
+
+
+该演示使用的提示词：
+
+```text
+Please help me post a breaking news message on Toutiao,
+
+and attach the following image: /Users/qingyu/Desktop/news_img.png
+
+Please use toutiao-mcp to post. You can use toutiao-mcp's built-in skills to decide the article title and content yourself.
+```
 
 <details>
 <summary><strong>1）扫码登录（toutiao_login）</strong></summary>
