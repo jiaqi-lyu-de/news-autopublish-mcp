@@ -35,10 +35,17 @@ npm install
 cp .env.example .env
 ```
 
-Set your Event Registry API key:
+Set your Event Registry API key (only required when using `source=eventregistry`):
 
 ```env
 NEWS_API_KEY=your_event_registry_api_key
+```
+
+Optional: default news source for `get_breaking_news`:
+
+```env
+# eventregistry | hackernews
+NEWS_SOURCE=hackernews
 ```
 
 3) Run in MCP Inspector (recommended for debugging)
@@ -51,12 +58,14 @@ npm run inspect
 
 Main Features
 
+- Publish Article demo (Codex): [toutiao_publish_article_codex.mp4](videos/toutiao_publish_article_codex.mp4)
+
 <details>
 <summary><strong>1) QR Login (toutiao_login)</strong></summary>
 
 Starts a visible browser, opens Toutiao, extracts the QR code, and watches login state in the background.
 
-Demo video:
+Demo video: [toutiao_login.mp4](videos/toutiao_login.mp4)
 
 </details>
 
@@ -65,16 +74,16 @@ Demo video:
 
 Runs a headless browser to validate whether the current session is still logged in, and updates cookies if needed.
 
-Demo video:
+Demo video: [toutiao_check_status.mp4](videos/toutiao_check_status.mp4)
 
 </details>
 
 <details>
-<summary><strong>3) Publish Article (toutiao_publish_article)</strong></summary>
+<summary><strong>3) Fetch Breaking News (get_breaking_news)</strong></summary>
 
-Publishes an article with `title`, `content`, and a local cover image path (`imagePath`).
+Fetches breaking news from `eventregistry` (requires `NEWS_API_KEY`) or `hackernews` (no key required).
 
-Demo video:
+Demo video: [get_breaking_news.mp4](videos/get_breaking_news.mp4)
 
 </details>
 
@@ -83,7 +92,7 @@ Demo video:
 
 Deletes the local `cookies.json` file to reset login state.
 
-Demo video:
+Demo video: [toutiao_logout.mp4](videos/toutiao_logout.mp4)
 
 </details>
 
@@ -94,7 +103,9 @@ Demo video:
 | `toutiao_login` | Get QR code and wait for scan | — |
 | `toutiao_check_status` | Check Toutiao login status | — |
 | `toutiao_logout` | Delete local cookies file | — |
-| `get_breaking_news` | Fetch breaking news from Event Registry | — |
+| `get_breaking_news` | Fetch breaking news (`eventregistry` or `hackernews`) | `source?`, `kind?`, `limit?`, `withDetails?` |
+| `get_hackernews_stories` | Fetch Hacker News stories | `kind?`, `limit?`, `withDetails?` |
+| `get_hackernews_item` | Fetch a Hacker News item by id | `id` |
 | `toutiao_publish_article` | Publish a Toutiao article | `title`, `content`, `imagePath` |
 
 ### Claude Desktop integration
@@ -121,6 +132,14 @@ Add this to your `claude_desktop_config.json`:
 - `cookies.json` contains sensitive session tokens and is ignored by `.gitignore` by default. Do not commit it.
 - `toutiao_publish_article` requires `imagePath` to exist locally (absolute path recommended).
 - If Toutiao UI changes, selectors may break and require updates in `src/toutiao/publish.js`.
+
+### Skill option (Hacker News)
+
+If you prefer a skill-based workflow (instead of relying on a paid/limited news API), this repo vendors the Hacker News skill at:
+
+- `skills/hackernews/SKILL.md`
+
+Leave the fetching/curation to your agent using that skill, then publish via `toutiao_publish_article`.
 
 ### License
 
@@ -163,6 +182,13 @@ cp .env.example .env
 NEWS_API_KEY=your_event_registry_api_key
 ```
 
+可选：为 `get_breaking_news` 设置默认新闻来源：
+
+```env
+# eventregistry | hackernews
+NEWS_SOURCE=hackernews
+```
+
 3）使用 MCP Inspector 调试（推荐）
 
 ```bash
@@ -173,12 +199,14 @@ npm run inspect
 
 主要功能
 
+- 发布文章演示（Codex）：[toutiao_publish_article_codex.mp4](videos/toutiao_publish_article_codex.mp4)
+
 <details>
 <summary><strong>1）扫码登录（toutiao_login）</strong></summary>
 
 启动可见浏览器打开头条，提取二维码，并在后台监听登录状态变化。
 
-视频演示：
+视频演示：[toutiao_login.mp4](videos/toutiao_login.mp4)
 
 </details>
 
@@ -187,16 +215,16 @@ npm run inspect
 
 使用无头浏览器检测当前会话是否已登录，并在需要时更新 Cookie。
 
-视频演示：
+视频演示：[toutiao_check_status.mp4](videos/toutiao_check_status.mp4)
 
 </details>
 
 <details>
-<summary><strong>3）发布文章（toutiao_publish_article）</strong></summary>
+<summary><strong>3）获取突发新闻（get_breaking_news）</strong></summary>
 
-发布文章，参数为 `title`、`content`，以及本地封面图片路径 `imagePath`。
+从 `eventregistry`（需要 `NEWS_API_KEY`）或 `hackernews`（无需 key）获取突发新闻/科技新闻。
 
-视频演示：
+视频演示：[get_breaking_news.mp4](videos/get_breaking_news.mp4)
 
 </details>
 
@@ -205,7 +233,7 @@ npm run inspect
 
 删除本地 `cookies.json`，重置登录状态。
 
-视频演示：
+视频演示：[toutiao_logout.mp4](videos/toutiao_logout.mp4)
 
 </details>
 
@@ -216,7 +244,9 @@ npm run inspect
 | `toutiao_login` | 获取登录二维码并等待扫码 | 无 |
 | `toutiao_check_status` | 检查头条登录状态 | 无 |
 | `toutiao_logout` | 删除本地 cookies 文件 | 无 |
-| `get_breaking_news` | 从 Event Registry 获取突发新闻 | 无 |
+| `get_breaking_news` | 获取突发新闻（支持 `eventregistry` 或 `hackernews`） | `source?`, `kind?`, `limit?`, `withDetails?` |
+| `get_hackernews_stories` | 获取 Hacker News 故事列表 | `kind?`, `limit?`, `withDetails?` |
+| `get_hackernews_item` | 根据 id 获取 Hacker News 条目 | `id` |
 | `toutiao_publish_article` | 发布头条文章 | `title`, `content`, `imagePath` |
 
 ### Claude Desktop 集成
@@ -243,6 +273,14 @@ npm run inspect
 - `cookies.json` 含敏感会话令牌，默认已加入 `.gitignore`，请勿提交到仓库。
 - `toutiao_publish_article` 需要本地存在的 `imagePath`（建议使用绝对路径）。
 - 若头条页面结构变更导致选择器失效，可从 `src/toutiao/publish.js` 开始排查与修复。
+
+### Skill 用法（Hacker News）
+
+如果你希望不用第三方新闻 API，而改用 “skill 驱动” 的方式拉取/筛选科技新闻，本仓库已内置 Hacker News skill：
+
+- `skills/hackernews/SKILL.md`
+
+你可以让 AI 先用该 skill 获取/整理内容，再调用 `toutiao_publish_article` 发布。
 
 ### 开源协议
 

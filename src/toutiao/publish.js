@@ -203,7 +203,6 @@ export async function publishArticle(title, content, imagePath) {
         await page.click(selectors.publishBtn);
         await new Promise(resolve => setTimeout(resolve, 2000));
         await page.click(selectors.publishBtn);
-        await browser.close();
 
         // Return success info.
         return {
