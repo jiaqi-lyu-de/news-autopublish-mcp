@@ -9,6 +9,7 @@ import { login } from "./toutiao/login.js";
 import { checkLoginStatus } from "./toutiao/status.js";
 import { logout } from "./toutiao/logout.js";
 import { getBreakingNews } from "./services/news.js";
+import { getItem, getStories } from "./services/hackernews.js";
 import { publishArticle } from "./toutiao/publish.js";
 
 
@@ -59,10 +60,38 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             {
                 name: "get_breaking_news",
-                description: "获取全球突发新闻（Breaking News）",
+                description: "获取突发新闻（支持 Event Registry API 或 Hacker News）",
                 inputSchema: {
                     type: "object",
-                    properties: {},
+                    properties: {
+                        source: { type: "string", description: "news source: eventregistry | hackernews" },
+                        kind: { type: "string", description: "Hacker News kind: top | best | new | ask | show | job" },
+                        limit: { type: "number", description: "Hacker News story count (1-50)" },
+                        withDetails: { type: "boolean", description: "For Hacker News: include item details (default true)" },
+                    },
+                },
+            },
+            {
+                name: "get_hackernews_stories",
+                description: "Fetch Hacker News stories (top/best/new/ask/show/job)",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        kind: { type: "string", description: "top | best | new | ask | show | job" },
+                        limit: { type: "number", description: "number of stories (1-50)" },
+                        withDetails: { type: "boolean", description: "include full item details (default true)" },
+                    },
+                },
+            },
+            {
+                name: "get_hackernews_item",
+                description: "Fetch a Hacker News item (story/comment/job) by id",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        id: { type: "number", description: "Hacker News item id" },
+                    },
+                    required: ["id"],
                 },
             },
             {
@@ -136,12 +165,37 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (request.params.name === "get_breaking_news") {
-        const result = await getBreakingNews();
+        const result = await getBreakingNews(request.params.arguments ?? {});
         return {
             content: [
                 {
                     type: "text",
                     text: JSON.stringify(result, null, 2),
+                },
+            ],
+        };
+    }
+
+    if (request.params.name === "get_hackernews_stories") {
+        const result = await getStories(request.params.arguments ?? {});
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: JSON.stringify({ status: "success", source: "hackernews", data: result }, null, 2),
+                },
+            ],
+        };
+    }
+
+    if (request.params.name === "get_hackernews_item") {
+        const { id } = request.params.arguments ?? {};
+        const result = await getItem(id);
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: JSON.stringify({ status: "success", source: "hackernews", data: result }, null, 2),
                 },
             ],
         };

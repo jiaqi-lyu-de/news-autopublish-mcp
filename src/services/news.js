@@ -1,9 +1,34 @@
 import fetch from 'node-fetch';
+import { getStories } from './hackernews.js';
 
 /**
  * Breaking news fetching logic.
  */
-export async function getBreakingNews() {
+export async function getBreakingNews(options = {}) {
+    const source = String(options.source ?? process.env.NEWS_SOURCE ?? 'eventregistry').toLowerCase();
+
+    if (source === 'hackernews') {
+        try {
+            const data = await getStories({
+                kind: options.kind ?? 'top',
+                limit: options.limit ?? 10,
+                withDetails: options.withDetails ?? true,
+            });
+            return {
+                status: 'success',
+                source: 'hackernews',
+                data,
+            };
+        } catch (error) {
+            console.error('Error fetching Hacker News stories:', error);
+            return {
+                status: 'error',
+                source: 'hackernews',
+                message: `Failed to fetch Hacker News stories: ${error.message}`,
+            };
+        }
+    }
+
     const apiKey = process.env.NEWS_API_KEY || '';
 
     if (!apiKey) {
