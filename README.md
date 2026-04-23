@@ -58,14 +58,14 @@ npm run inspect
 
 Main Features
 
-- Publish Article demo (Codex): [toutiao_publish_article_codex.mp4](videos/toutiao_publish_article_codex.mp4)
+- Publish Article demo (Codex): [toutiao_publish_article_codex.gif](videos/toutiao_publish_article_codex.gif)
 
 <details>
 <summary><strong>1) QR Login (toutiao_login)</strong></summary>
 
 Starts a visible browser, opens Toutiao, extracts the QR code, and watches login state in the background.
 
-Demo video: [toutiao_login.mp4](videos/toutiao_login.mp4)
+Demo GIF: [toutiao_login.gif](videos/toutiao_login.gif)
 
 </details>
 
@@ -74,7 +74,7 @@ Demo video: [toutiao_login.mp4](videos/toutiao_login.mp4)
 
 Runs a headless browser to validate whether the current session is still logged in, and updates cookies if needed.
 
-Demo video: [toutiao_check_status.mp4](videos/toutiao_check_status.mp4)
+Demo GIF: [toutiao_check_status.gif](videos/toutiao_check_status.gif)
 
 </details>
 
@@ -83,7 +83,7 @@ Demo video: [toutiao_check_status.mp4](videos/toutiao_check_status.mp4)
 
 Fetches breaking news from `eventregistry` (requires `NEWS_API_KEY`) or `hackernews` (no key required).
 
-Demo video: [get_breaking_news.mp4](videos/get_breaking_news.mp4)
+Demo GIF: [get_breaking_news.gif](videos/get_breaking_news.gif)
 
 </details>
 
@@ -92,7 +92,7 @@ Demo video: [get_breaking_news.mp4](videos/get_breaking_news.mp4)
 
 Deletes the local `cookies.json` file to reset login state.
 
-Demo video: [toutiao_logout.mp4](videos/toutiao_logout.mp4)
+Demo GIF: [toutiao_logout.gif](videos/toutiao_logout.gif)
 
 </details>
 
@@ -199,14 +199,14 @@ npm run inspect
 
 主要功能
 
-- 发布文章演示（Codex）：[toutiao_publish_article_codex.mp4](videos/toutiao_publish_article_codex.mp4)
+- 发布文章演示（Codex）：[toutiao_publish_article_codex.gif](videos/toutiao_publish_article_codex.gif)
 
 <details>
 <summary><strong>1）扫码登录（toutiao_login）</strong></summary>
 
 启动可见浏览器打开头条，提取二维码，并在后台监听登录状态变化。
 
-视频演示：[toutiao_login.mp4](videos/toutiao_login.mp4)
+GIF 演示：[toutiao_login.gif](videos/toutiao_login.gif)
 
 </details>
 
@@ -215,7 +215,7 @@ npm run inspect
 
 使用无头浏览器检测当前会话是否已登录，并在需要时更新 Cookie。
 
-视频演示：[toutiao_check_status.mp4](videos/toutiao_check_status.mp4)
+GIF 演示：[toutiao_check_status.gif](videos/toutiao_check_status.gif)
 
 </details>
 
@@ -224,7 +224,7 @@ npm run inspect
 
 从 `eventregistry`（需要 `NEWS_API_KEY`）或 `hackernews`（无需 key）获取突发新闻/科技新闻。
 
-视频演示：[get_breaking_news.mp4](videos/get_breaking_news.mp4)
+GIF 演示：[get_breaking_news.gif](videos/get_breaking_news.gif)
 
 </details>
 
@@ -233,7 +233,7 @@ npm run inspect
 
 删除本地 `cookies.json`，重置登录状态。
 
-视频演示：[toutiao_logout.mp4](videos/toutiao_logout.mp4)
+GIF 演示：[toutiao_logout.gif](videos/toutiao_logout.gif)
 
 </details>
 
